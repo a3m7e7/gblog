@@ -8,9 +8,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
+
+type PostWriteSchema struct {
+	Body string `json:"body"`
+}
 
 type IndexResponse struct {
 	Id   string `json:"id" bson:"_id"`
@@ -48,6 +53,21 @@ func main() {
 			log.Printf("could not write response: %s", request.RequestURI)
 		}
 		return
+	})
+
+	r.HandleFunc("/add/", func(writer http.ResponseWriter, request *http.Request) {
+		doc := PostWriteSchema{}
+
+		requestBody, err := ioutil.ReadAll(request.Body)
+		err = json.Unmarshal(requestBody, &doc)
+		if err != nil {
+			return
+		}
+		_, err = collection.InsertOne(ctx, doc)
+		if err != nil {
+			return
+		}
+		writer.WriteHeader(http.StatusCreated)
 	})
 
 	r.HandleFunc("/{postId}/", func(writer http.ResponseWriter, request *http.Request) {
