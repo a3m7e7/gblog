@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "gblog/post";
+
+message Post {
+	string body = 1;
+}
+
+message GetAllPostsRequest {}
+
+message GetAllPostsResponse {
+	repeated Post posts = 1;
+}
+
+message AddPostRequest {
+	Post post = 1;
+}
+
+message AddPostResponse {}
+
+service PostStorage {
+	rpc GetAllPosts(GetAllPostsRequest) returns (GetAllPostsResponse);
+	rpc AddPost(AddPostRequest) returns (AddPostResponse);
+}
+
